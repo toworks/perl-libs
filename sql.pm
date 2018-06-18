@@ -8,7 +8,7 @@ package sql;{
 
   sub new {
     my($class, $log) = @_;
-    my $self = bless {	'error' => 1,
+    my $self = bless {	'sql' => {'error' => 1},
                         'log' => $log,
     }, $class;
 
@@ -16,21 +16,20 @@ package sql;{
   }
  
   sub set_con {
-    my($self, $host, $database) = @_; # ссылка на объект
+    my($self, $driver, $host, $database) = @_;
     $self->{sql}->{host} = $host;
     $self->{sql}->{database} = $database;
-#    $self->{dsn} = "Driver={ODBC Driver 13 for SQL Server};Server=$self->{sql}->{host};Database=$self->{sql}->{database};Trusted_Connection=yes" if $self->{sql}->{type} eq "mssql";
-	$self->{dsn} = "Driver={SQL Server Native Client 11.0};Server=$self->{sql}->{host};Database=$self->{sql}->{database};Trusted_Connection=yes" if $self->{sql}->{type} eq "mssql";
+	$self->{sql}->{dsn} = "Driver={$driver};Server=$self->{sql}->{host};Database=$self->{sql}->{database};Trusted_Connection=yes" if $self->{sql}->{type} eq "mssql";
   }
 
   sub conn {
-    my($self) = @_; # ссылка на объект
-    eval{ $self->{dbh} = DBI->connect("dbi:ODBC:$self->{dsn}") || die "$DBI::errstr" if $self->{sql}->{type} eq "mssql";
-          $self->{dbh}->{RaiseError} = 0; # при 1 eval игнорируется, для диагностики полезно
-          $self->{dbh}->{LongReadLen} = 512 * 1024 || die "$DBI::errstr"; # We are interested in the first 512 KB of data
-          $self->{dbh}->{LongTruncOk} = 1 || die "$DBI::errstr"; # We're happy to truncate any excess
-    };# обработка ошибки
-    if($@) { $self->{log}->save('e', "$@"); $self->{error} = 1; } else { $self->{log}->save('i', "connected sql"); $self->{error} = 0; }
+    my($self) = @_;
+    eval{ $self->{sql}->{dbh} = DBI->connect("dbi:ODBC:$self->{sql}->{dsn}") || die "$DBI::errstr" if $self->{sql}->{type} eq "mssql";
+          $self->{sql}->{dbh}->{RaiseError} = 0; # при 1 eval игнорируется, для диагностики полезно
+          $self->{sql}->{dbh}->{LongReadLen} = 512 * 1024 || die "$DBI::errstr"; # We are interested in the first 512 KB of data
+          $self->{sql}->{dbh}->{LongTruncOk} = 1 || die "$DBI::errstr"; # We're happy to truncate any excess
+    };
+    if($@) { $self->{log}->save('e', "$@"); $self->{sql}->{error} = 1; } else { $self->{sql}->{error} = 0; }
   }
 
   sub get {
@@ -44,10 +43,10 @@ package sql;{
         $self->{sql}->{$key} = $set{$key};
     }
   }
-
+=comm
   sub debug {
     my($self, $debug) = @_;
-    $self->{'DEBUG'} = $debug;
+    $self->{sql}->{'DEBUG'} = $debug;
   }
 
   sub get_data {
@@ -134,5 +133,6 @@ package sql;{
     }
     undef $values;
   }
+=cut
 }
 1;
