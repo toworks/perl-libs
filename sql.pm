@@ -1,6 +1,8 @@
 package sql;{ 
-  use DBI;
+  use strict;
+  use warnings;
   use utf8;
+  use DBI;
 #  binmode(STDOUT,':utf8');
 #  use open(':encoding(utf8)');
   use DBI qw(:sql_types);
@@ -43,96 +45,5 @@ package sql;{
         $self->{sql}->{$key} = $set{$key};
     }
   }
-=comm
-  sub debug {
-    my($self, $debug) = @_;
-    $self->{sql}->{'DEBUG'} = $debug;
-  }
-
-  sub get_data {
-    my($self) = @_;
-    my($sth, $ref, $query, @values);
-
-    $self->conn() if ( $self->{error} == 1 or ! $self->{dbh}->ping );
-
-#    $query = "SELECT *, datediff(s, '1970', getdate()) as [current_timestamp] FROM [$self->{sql}->{database}]..$self->{sql}->{table} with(nolock) ";
-#	$query = "SELECT * FROM [$self->{sql}->{database}]..process_operations with(nolock) ";
-#	$query .= "where enable = 1 ";
-	$query = "exec([$self->{sql}->{database}]..get_process_operations_query())";
-
-    eval{ $self->{dbh}->{RaiseError} = 1;
-          $sth = $self->{dbh}->prepare($query) || die "$DBI::errstr";
-          $sth->execute() || die "$DBI::errstr";
-    };
-    if ($@) {   $self->{error} = 1;
-                $self->{log}->save('e', "$DBI::errstr");
-    };
-
-    unless($@) {
-        eval{
-                my $count = 0;
-                while ($ref = $sth->fetchrow_hashref()) {
-                    #print Dumper($ref), "\n";
-                    $values[$count] = $ref;
-                    $count++;
-                }
-        }
-    }
-    eval{ $sth->finish() || die "$DBI::errstr";	};# обработка ошибки
-    if ($@) {   $self->{error} = 1;
-                $self->{log}->save('e', "$DBI::errstr");
-				$self->{log}->save('d', "$query");
-    };
-
-    #$self->{log}->save('d', "\n".Dumper(\@values)."\n") if $self->{'DEBUG'};
-    
-    return(\@values);
-  }
-
-  sub set_data {
-    my($self, $id_measuring) = @_;
-    my($sth, $ref, $query);
-
-    $self->conn() if ( $self->{error} == 1 or ! $self->{dbh}->ping );
-
-	$query = "exec [$self->{sql}->{database}]..[ins_process_operations_metadata] " . $id_measuring;
-	
-    eval{ $self->{dbh}->{RaiseError} = 1;
-          $sth = $self->{dbh}->prepare($query) || die "$DBI::errstr";
-          $sth->execute() || die "$DBI::errstr";
-    };
-    if ($@) {   $self->{error} = 1;
-                $self->{log}->save('e', "$DBI::errstr");
-				$self->{log}->save('d', "$query");
-    };
-  }
-
-  sub response {
-    my($self, $mid, $status, $type) = @_;
-    my($sth, $ref, $query);
-
-    $self->conn() if ( $self->{error} == 1 );
-    
-    $query  = "update [$self->{sql}->{database}]..$self->{sql}->{table}_response ";
-#	$query  = "update [$self->{sql}->{database}]..stage_response ";
-    $query .= "set response = ? ";
-    $query .= "where mid = ? and type = ?";
-
-    eval{	$self->{dbh}->{RaiseError} = 1;
-            $self->{dbh}->{AutoCommit} = 0;
-            $sth = $self->{dbh}->prepare_cached($query) || die "$DBI::errstr";
-            $sth->bind_param(1, $status) || die "$DBI::errstr";
-            $sth->bind_param(2, $mid) || die "$DBI::errstr";
-            $sth->bind_param(3, $type) || die "$DBI::errstr";
-            $sth->execute() || die "$DBI::errstr";
-            $self->{dbh}->{AutoCommit} = 1;
-    };
-    if ($@) {
-        $self->{log}->save('e', "$@");
-        $self->{error} = 1;
-    }
-    undef $values;
-  }
-=cut
 }
 1;
