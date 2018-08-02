@@ -1,4 +1,4 @@
-package CONF;{
+package configuration;{
   use strict;
   use warnings;
   use utf8;
