@@ -61,12 +61,14 @@ package serial;{
 			$self->{fh}->parity($self->{serial}->{parity});
 			$self->{fh}->stopbits($self->{serial}->{stopbits});
 			$self->{fh}->read_interval(10);
-#			$self->{fh}->read_const_time($self->{serial}->{timeout});
+			$self->{fh}->read_const_time(200);
 			$self->{fh}->error_msg(1);
 			$self->{fh}->user_msg(1);
 			$self->{fh}->write_settings;
+			$self->{serial}->{error} = 0;
 	};
-	if($@) { $self->{log}->save('e', "$@"); }
+	if($@) { $self->{serial}->{error} = 1;
+			 $self->{log}->save('e', "$@"); }
   }
 
 }
