@@ -33,7 +33,7 @@ package opc;{
     eval{ 	$self->{opc}->{opcintf} = undef;
 			$self->{opc}->{opcintf} = Win32::OLE::OPC->new('OPC.Automation',
 												  $self->{opc}->{name},
-												  $self->{opc}->{host}) or die "failure to connect to opc");
+												  $self->{opc}->{host} or die "failure to connect to opc");
 	};
 	if($@) { $self->{opc}->{error} = 1;
 			 $self->{log}->save('e', "$@"); }
