@@ -33,7 +33,26 @@ package opc;{
     eval{ 	$self->{opc}->{opcintf} = undef;
 			$self->{opc}->{opcintf} = Win32::OLE::OPC->new('OPC.Automation',
 												  $self->{opc}->{name},
-												  $self->{opc}->{host} or die "failure to connect to opc");
+												  $self->{opc}->{host} or die "$@");
+	};
+	if($@) { $self->{opc}->{error} = 1;
+			 $self->{log}->save('e', "$@"); }
+	
+	eval{ $self->set_tags; };
+	if($@) { $self->{opc}->{error} = 1;
+			 $self->{log}->save('e', "$@"); }
+  }
+  
+  sub set_tags {
+	my($self) = @_;
+	eval{	$self->{opc}->{opcintf}->MoveToRoot;
+			$self->{opc}->{group} = $self->{opc}->{opcintf}->OPCGroups->Add($self->{opc}->{group});
+			$self->{opc}->{items} = $self->{opc}->{group}->OPCItems;
+			foreach my $tag ( @{$self->{opc}->{tags}} ) {
+				print  $tag, "\n";
+				#$self->{opc}->{items}->AddItem($tag, $self->{opc}->{opcintf});
+			}	
+			$self->{opc}->{error} = 0;
 	};
 	if($@) { $self->{opc}->{error} = 1;
 			 $self->{log}->save('e', "$@"); }
