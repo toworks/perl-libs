@@ -49,6 +49,9 @@ package opc;{
 	eval{	$self->{opc}->{opcintf}->MoveToRoot;
 			$self->{opc}->{group} = $self->{opc}->{opcintf}->OPCGroups->Add($self->{opc}->{group});
 			$self->{opc}->{items} = $self->{opc}->{group}->OPCItems;
+			
+			print Dumper($self->{opc}->{tags});
+			
 			foreach my $tag ( @{$self->{opc}->{tags}} ) {
 				print  $tag, "\n";
 				#$self->{opc}->{items}->AddItem($tag, $self->{opc}->{opcintf});
