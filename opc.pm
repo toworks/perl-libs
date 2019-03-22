@@ -33,7 +33,8 @@ package opc;{
     eval{ 	$self->{opc}->{opcintf} = undef;
 			$self->{opc}->{opcintf} = Win32::OLE::OPC->new('OPC.Automation',
 												  $self->{opc}->{name},
-												  $self->{opc}->{host} or die "$@");
+												  $self->{opc}->{host}
+												  )	or die "$@";
 	};
 	if($@) { $self->{opc}->{error} = 1;
 			 $self->{log}->save('e', "$@"); }
