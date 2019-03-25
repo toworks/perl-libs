@@ -33,7 +33,7 @@ package opc;{
     eval{ 	$self->{opc}->{opcintf} = undef;
 			$self->{opc}->{opcintf} = Win32::OLE::OPC->new('OPC.Automation',
 												  $self->{opc}->{name}#,
-												  #$self->{opc}->{host}
+												  $self->{opc}->{host}
 												  )	or die "$!";
 			$self->{opc}->{opcintf}->MoveToRoot	or die "$!";
 			$self->{opc}->{group} = $self->{opc}->{opcintf}->OPCGroups->Add($self->{opc}->{group_name})	or die "$!";
