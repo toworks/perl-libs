@@ -56,5 +56,6 @@ package opc;{
 	}
 	if($@) { $self->{opc}->{error} = 1;
 			 $self->{log}->save('e', "$@"); }
+  }
 }
 1;
