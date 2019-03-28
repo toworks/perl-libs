@@ -45,17 +45,5 @@ package opc;{
 	if($@) { $self->{opc}->{error} = 1;
 			 $self->{log}->save('e', "$@"); }
   }
-
-  sub disconnect {
-	my($self) = @_;
-	eval {
-			$self->{opc}->{group}->SetProperty('IsActive', 0) or die "$!";
-			$self->{opc}->{group}->SetProperty('IsSubscribed', 0) or die "$!";
-			$self->{opc}->{opcintf}->OPCGroups->Remove($self->{opc}->{group_name}) or die "$!";
-			$self->{opc}->{opcintf}->Disconnect or die "$!";
-	}
-	if($@) { $self->{opc}->{error} = 1;
-			 $self->{log}->save('e', "$@"); }
-  }
 }
 1;
