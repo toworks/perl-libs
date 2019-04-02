@@ -49,22 +49,23 @@ package serial;{
 			my $OS_win = ($^O eq "MSWin32") ? 1 : 0;
 			if ($OS_win) 
 			{
-				$self->{fh} = new Win32::SerialPort($self->{serial}->{comport});
+				$self->{fh} = new Win32::SerialPort($self->{serial}->{comport}) or die "$!";
 			}
 			else 
 			{
-				$self->{fh} = new Device::SerialPort($self->{serial}->{comport});
+				$self->{fh} = new Device::SerialPort($self->{serial}->{comport}) or die "$!";
 			}
 
-			$self->{fh}->databits($self->{serial}->{databits});
-			$self->{fh}->baudrate($self->{serial}->{baud});
-			$self->{fh}->parity($self->{serial}->{parity});
-			$self->{fh}->stopbits($self->{serial}->{stopbits});
-			$self->{fh}->read_interval(10);
-			$self->{fh}->read_const_time(200);
-			$self->{fh}->error_msg(1);
-			$self->{fh}->user_msg(1);
-			$self->{fh}->write_settings;
+			$self->{fh}->databits($self->{serial}->{databits}) or die "$!";
+			$self->{fh}->baudrate($self->{serial}->{baud}) or die "$!";
+			$self->{fh}->parity($self->{serial}->{parity}) or die "$!";
+			$self->{fh}->stopbits($self->{serial}->{stopbits}) or die "$!";
+			$self->{fh}->handshake($self->{serial}->{handshake} || 'none') or die "$!";
+			$self->{fh}->read_interval(10) or die "$!";
+			$self->{fh}->read_const_time(200) or die "$!";
+			$self->{fh}->error_msg(1) or die "$!";
+			$self->{fh}->user_msg(1) or die "$!";
+			$self->{fh}->write_settings or die "$!";
 			$self->{serial}->{error} = 0;
 	};
 	if($@) { $self->{serial}->{error} = 1;
