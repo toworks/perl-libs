@@ -61,8 +61,9 @@ package serial;{
 			$self->{fh}->parity($self->{serial}->{parity}) or die "$^E";
 			$self->{fh}->stopbits($self->{serial}->{stopbits}) or die "$^E";
 			$self->{fh}->handshake($self->{serial}->{handshake} || 'none') or die "$^E";
-			$self->{fh}->read_interval(10) or die "$^E";
-			$self->{fh}->read_const_time(200) or die "$^E";
+			$self->{fh}->read_interval(100) or die "$^E";
+			$self->{fh}->read_const_time(100) or die "$^E";
+			$self->{fh}->buffers(4096, 4096) or die "$^E"; # read, write returns current in list context
 			$self->{fh}->error_msg(1) or die "$^E";
 			$self->{fh}->user_msg(1) or die "$^E";
 			$self->{fh}->write_settings or die "$^E";
