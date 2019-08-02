@@ -31,7 +31,7 @@ package opc;{
   sub connect {
 	my($self) = @_;
     eval{ 	$self->{opc}->{opcintf} = undef;
-			$self->{opc}->{opcintf} = Win32::OLE::OPC->new('OPC.Automation',
+			$self->{opc}->{opcintf} = Win32::OLE::OPC->new($self->{opc}->{progid} || 'OPC.Automation',
 												  $self->{opc}->{name},
 												  $self->{opc}->{host}
 												  )	or die "$!";
