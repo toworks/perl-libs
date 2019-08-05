@@ -36,14 +36,25 @@ package opc;{
 												  $self->{opc}->{host}
 												  )	or die "$!";
 #			$self->{opc}->{opcintf}->MoveToRoot	or die "$!";
-			$self->{opc}->{group} = $self->{opc}->{opcintf}->OPCGroups->Add($self->{opc}->{group_name})	or die "$!";
-			$self->{opc}->{group}->SetProperty('UpdateRate', 500);
-			$self->{opc}->{group}->SetProperty('IsActive', 1);
-			$self->{opc}->{group}->SetProperty('IsSubscribed', 1);
-			$self->{opc}->{items} = $self->{opc}->{group}->OPCItems or die "$!";
+		$self->add_group( $_ ) for keys %{$self->{opc}->{groups}};
 	};
 	if($@) { $self->{opc}->{error} = 1;
 			 $self->{log}->save('e', "$@"); }
+  }
+
+  sub add_group {
+	my($self, $name) = @_;
+    eval{ 	$self->{opc}->{$name}->{group} = $self->{opc}->{opcintf}->OPCGroups->Add($name)	or die "$!";
+			$self->{opc}->{$name}->{group}->SetProperty('UpdateRate', 100);
+			$self->{opc}->{$name}->{group}->SetProperty('IsActive', 1);
+			$self->{opc}->{$name}->{group}->SetProperty('IsSubscribed', 1);
+			$self->{opc}->{$name}->{items} = $self->{opc}->{$name}->{group}->OPCItems or die "$!";
+	};
+	if($@) { $self->{opc}->{error} = 1;
+			 $self->{log}->save('e', "$@");
+	} else {
+		$self->{log}->save('i', "added opc group: " . $name);
+	}
   }
 }
 1;
