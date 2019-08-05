@@ -31,12 +31,13 @@ package opc;{
   sub connect {
 	my($self) = @_;
     eval{ 	$self->{opc}->{opcintf} = undef;
+			$self->{opc}->{tags} = undef;
 			$self->{opc}->{opcintf} = Win32::OLE::OPC->new($self->{opc}->{progid} || 'OPC.Automation',
 												  $self->{opc}->{name},
 												  $self->{opc}->{host}
 												  )	or die "$!";
 #			$self->{opc}->{opcintf}->MoveToRoot	or die "$!";
-		$self->add_group( $_ ) for keys %{$self->{opc}->{groups}};
+			$self->add_group( $_ ) for keys %{$self->{opc}->{groups}};
 	};
 	if($@) { $self->{opc}->{error} = 1;
 			 $self->{log}->save('e', "$@"); }
