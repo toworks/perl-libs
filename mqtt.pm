@@ -36,7 +36,7 @@ package mqtt;{
 
 	my $connection_string = $self->{mqtt}->{host} || 'localhost';
 
-	$connection_string .= $self->{mqtt}->{port} || 1883;
+	$connection_string .=":". $self->{mqtt}->{port} if defined($self->{mqtt}->{port});
 	
 	$self->{log}->save('d', "$connection_string") if $self->{mqtt}->{'DEBUG'};
 	
