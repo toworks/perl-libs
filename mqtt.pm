@@ -34,20 +34,39 @@ package mqtt;{
 	# Allow unencrypted connection with credentials
 	$ENV{MQTT_SIMPLE_ALLOW_INSECURE_LOGIN} = 1;
 
-	my $connection_string = $self->{mqtt}->{host} || 'localhost';
+	$self->{connection_string} = $self->{mqtt}->{host} || 'localhost';
 
-	$connection_string .=":". $self->{mqtt}->{port} if defined($self->{mqtt}->{port});
+	$self->{connection_string} .=":". $self->{mqtt}->{port} if defined($self->{mqtt}->{port});
 	
-	$self->{log}->save('d', "mqtt: connection string: $connection_string") if $self->{mqtt}->{'DEBUG'};
+	$self->{log}->save('d', "mqtt: connection string: ". $self->{connection_string}) if $self->{mqtt}->{'DEBUG'};
 	
-    eval{ 	$self->{mqtt}->{mqtt} = Net::MQTT::Simple->new($connection_string) or die "$!";
- 			# Depending if authentication is required, login to the broker
-			if( $self->{mqtt}->{user} and $self->{mqtt}->{password} ) {
-				$self->{mqtt}->{mqtt}->login($self->{mqtt}->{user}, $self->{mqtt}->{password});
-			}
+    $self->{mqtt}->{mqtt} = Net::MQTT::Simple->new($self->{connection_string});
+ 	# Depending if authentication is required, login to the broker
+	if( $self->{mqtt}->{user} and $self->{mqtt}->{password} ) {
+		$self->{mqtt}->{mqtt}->login($self->{mqtt}->{user}, $self->{mqtt}->{password}) or die "$!";
+	}
+	$self->{mqtt}->{error} = 0;
+	$self->{log}->save('i', "mqtt: connected ". $self->{connection_string});
+  }
+
+  sub publish {
+	my($self, $topic, $data) = @_;
+    eval{
+		$self->{mqtt}->{mqtt}->publish($topic, $data) or die "$!";
 	};
 	if($@) { $self->{mqtt}->{error} = 1;
-			 $self->{log}->save('e', "$@"); }
+			 $self->{log}->save('e', "$@");
+	}
+  }
+
+  sub retain {
+	my($self, $topic, $data) = @_;
+    eval{
+		$self->{mqtt}->{mqtt}->retain($topic, $data) or die "$!";
+	};
+	if($@) { $self->{mqtt}->{error} = 1;
+			 $self->{log}->save('e', "$@");
+	}
   }
 
   sub disconnect {
@@ -58,6 +77,7 @@ package mqtt;{
 	if($@) { $self->{mqtt}->{error} = 1;
 			 $self->{log}->save('e', "$@");
 	}
+	$self->{log}->save('i', "mqtt: disconnected ". $self->{connection_string});
   }
 }
 1;
