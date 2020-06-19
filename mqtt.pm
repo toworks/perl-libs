@@ -38,12 +38,12 @@ package mqtt;{
 
 	$connection_string .=":". $self->{mqtt}->{port} if defined($self->{mqtt}->{port});
 	
-	$self->{log}->save('d', "$connection_string") if $self->{mqtt}->{'DEBUG'};
+	$self->{log}->save('d', "mqtt: connection string: $connection_string") if $self->{mqtt}->{'DEBUG'};
 	
     eval{ 	$self->{mqtt}->{mqtt} = Net::MQTT::Simple->new($connection_string) or die "$!";
  			# Depending if authentication is required, login to the broker
 			if( $self->{mqtt}->{user} and $self->{mqtt}->{password} ) {
-				$self->{mqtt}->{mqtt}->login($$self->{mqtt}->{user}, $self->{mqtt}->{password});
+				$self->{mqtt}->{mqtt}->login($self->{mqtt}->{user}, $self->{mqtt}->{password});
 			}
 	};
 	if($@) { $self->{mqtt}->{error} = 1;
