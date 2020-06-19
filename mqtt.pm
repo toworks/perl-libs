@@ -52,6 +52,8 @@ package mqtt;{
   sub publish {
 	my($self, $topic, $data) = @_;
     eval{
+		$topic = $self->get('prefix') ."/". $topic if defined($self->get('prefix'));
+		$self->{log}->save('d', "publish topic: ". $topic . "\tdata: ". $data) if $self->{mqtt}->{'DEBUG'};
 		$self->{mqtt}->{mqtt}->publish($topic, $data) or die "$!";
 	};
 	if($@) { $self->{mqtt}->{error} = 1;
@@ -62,6 +64,8 @@ package mqtt;{
   sub retain {
 	my($self, $topic, $data) = @_;
     eval{
+		$topic = $self->get('prefix') ."/". $topic if defined($self->get('prefix'));
+		$self->{log}->save('d', "retain topic: ". $topic . "\tdata: ". $data) if $self->{mqtt}->{'DEBUG'};
 		$self->{mqtt}->{mqtt}->retain($topic, $data) or die "$!";
 	};
 	if($@) { $self->{mqtt}->{error} = 1;
