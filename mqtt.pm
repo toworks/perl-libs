@@ -36,8 +36,10 @@ package mqtt;{
 
 	my $connection_string = $self->{mqtt}->{host} || 'localhost';
 
-	$connection_string += $self->{mqtt}->{port} || 1883;
-
+	$connection_string .= $self->{mqtt}->{port} || 1883;
+	
+	$self->{log}->save('d', "$connection_string") if $self->{mqtt}->{'DEBUG'};
+	
     eval{ 	$self->{mqtt}->{mqtt} = Net::MQTT::Simple->new($connection_string) or die "$!";
  			# Depending if authentication is required, login to the broker
 			if( $self->{mqtt}->{user} and $self->{mqtt}->{password} ) {
