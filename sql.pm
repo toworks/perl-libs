@@ -10,7 +10,7 @@ package sql;{
 
   sub new {
     my($class, $log) = @_;
-    my $self = bless {	'sql' => {'error' => 1},
+    my $self = bless {  'sql' => {'error' => 1},
                         'log' => $log,
     }, $class;
 
@@ -21,12 +21,14 @@ package sql;{
     my($self, $driver, $host, $database) = @_;
     $self->{sql}->{host} = $host;
     $self->{sql}->{database} = $database;
-	$self->{sql}->{dsn} = "Driver={$driver};Server=$self->{sql}->{host};Database=$self->{sql}->{database};Trusted_Connection=yes" if $self->{sql}->{type} eq "mssql";
+    $self->{sql}->{dsn} = "Driver={$driver};Server=$self->{sql}->{host};Database=$self->{sql}->{database};Trusted_Connection=yes" if $self->{sql}->{type} eq "mssql";
+    $self->{sql}->{dsn} = "dbi:$driver:hostname=$self->{sql}->{host};db=$self->{sql}->{database}" if $self->{sql}->{type} eq "fbsql";
   }
 
   sub conn {
     my($self) = @_;
     eval{ $self->{sql}->{dbh} = DBI->connect("dbi:ODBC:$self->{sql}->{dsn}") || die "$DBI::errstr" if $self->{sql}->{type} eq "mssql";
+          $self->{sql}->{dbh} = DBI->connect("$self->{sql}->{dsn};ib_dialect=$self->{sql}->{dialect}", $self->{sql}->{user}, $self->{sql}->{password}) || die "$DBI::errstr" if $self->{sql}->{type} eq "fbsql";
           $self->{sql}->{dbh}->{RaiseError} = 0; # при 1 eval игнорируется, для диагностики полезно
           $self->{sql}->{dbh}->{LongReadLen} = 512 * 1024 || die "$DBI::errstr"; # We are interested in the first 512 KB of data
           $self->{sql}->{dbh}->{LongTruncOk} = 1 || die "$DBI::errstr"; # We're happy to truncate any excess
