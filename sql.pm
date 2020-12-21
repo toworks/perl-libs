@@ -21,7 +21,7 @@ package sql;{
     my($self, $driver, $host, $database) = @_;
     $self->{sql}->{host} = $host;
     $self->{sql}->{database} = $database;
-    $self->{sql}->{dsn} = "Driver={$driver};Server=$self->{sql}->{host};Database=$self->{sql}->{database};Trusted_Connection=yes" if $self->{sql}->{type} eq "mssql";
+    $self->{sql}->{dsn} = "Driver={$driver};Server=$self->{sql}->{host};Database=$self->{sql}->{database}" if $self->{sql}->{type} eq "mssql";
     $self->{sql}->{dsn} = "dbi:$driver:hostname=$self->{sql}->{host};db=$self->{sql}->{database}" if $self->{sql}->{type} eq "fbsql";
 	$self->{sql}->{dsn} = "dbi:$driver:host=$self->{sql}->{host};dbname=$self->{sql}->{database}" if $self->{sql}->{type} eq "pgsql";
 	$self->{sql}->{dsn} = "Driver={$driver};DBQ=$self->{sql}->{database}" if $self->{sql}->{type} eq "access";
@@ -29,7 +29,12 @@ package sql;{
 
   sub conn {
     my($self) = @_;
-    eval{ $self->{sql}->{dbh} = DBI->connect("dbi:ODBC:$self->{sql}->{dsn}") || die "$DBI::errstr" if $self->{sql}->{type} eq "mssql";
+    eval{ if ( defined($self->{sql}->{user}) ) {
+			$self->{sql}->{dbh} = DBI->connect("dbi:ODBC:$self->{sql}->{dsn};Uid=$self->{sql}->{user};Pwd=$self->{sql}->{password};") || die "$DBI::errstr" if $self->{sql}->{type} eq "mssql";
+		  } else {
+			$self->{sql}->{dbh} = DBI->connect("dbi:ODBC:$self->{sql}->{dsn};Trusted_Connection=yes") || die "$DBI::errstr" if $self->{sql}->{type} eq "mssql";
+		  }
+		  $self->{sql}->{dbh} = DBI->connect("dbi:ODBC:$self->{sql}->{dsn}") || die "$DBI::errstr" if $self->{sql}->{type} eq "mssql";
           $self->{sql}->{dbh} = DBI->connect("$self->{sql}->{dsn};ib_dialect=$self->{sql}->{dialect}", $self->{sql}->{user}, $self->{sql}->{password}) || die "$DBI::errstr" if $self->{sql}->{type} eq "fbsql";
 		  $self->{sql}->{dbh} = DBI->connect("$self->{sql}->{dsn}", $self->{sql}->{user}, $self->{sql}->{password}) || die "$DBI::errstr" if $self->{sql}->{type} eq "pgsql";
 		  $self->{sql}->{dbh} = DBI->connect("dbi:ODBC:$self->{sql}->{dsn}", $self->{sql}->{user}, $self->{sql}->{password}) || die "$DBI::errstr" if $self->{sql}->{type} eq "access";
