@@ -30,11 +30,10 @@ package sql;{
   sub conn {
     my($self) = @_;
     eval{ if ( defined($self->{sql}->{user}) ) {
-			$self->{sql}->{dbh} = DBI->connect("dbi:ODBC:$self->{sql}->{dsn};Uid=$self->{sql}->{user};Pwd=$self->{sql}->{password};") || die "$DBI::errstr" if $self->{sql}->{type} eq "mssql";
+			$self->{sql}->{dbh} = DBI->connect("dbi:ODBC:$self->{sql}->{dsn};Uid=$self->{sql}->{user};Pwd=$self->{sql}->{password}") || die "$DBI::errstr" if $self->{sql}->{type} eq "mssql";
 		  } else {
 			$self->{sql}->{dbh} = DBI->connect("dbi:ODBC:$self->{sql}->{dsn};Trusted_Connection=yes") || die "$DBI::errstr" if $self->{sql}->{type} eq "mssql";
 		  }
-		  $self->{sql}->{dbh} = DBI->connect("dbi:ODBC:$self->{sql}->{dsn}") || die "$DBI::errstr" if $self->{sql}->{type} eq "mssql";
           $self->{sql}->{dbh} = DBI->connect("$self->{sql}->{dsn};ib_dialect=$self->{sql}->{dialect}", $self->{sql}->{user}, $self->{sql}->{password}) || die "$DBI::errstr" if $self->{sql}->{type} eq "fbsql";
 		  $self->{sql}->{dbh} = DBI->connect("$self->{sql}->{dsn}", $self->{sql}->{user}, $self->{sql}->{password}) || die "$DBI::errstr" if $self->{sql}->{type} eq "pgsql";
 		  $self->{sql}->{dbh} = DBI->connect("dbi:ODBC:$self->{sql}->{dsn}", $self->{sql}->{user}, $self->{sql}->{password}) || die "$DBI::errstr" if $self->{sql}->{type} eq "access";
