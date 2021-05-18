@@ -25,6 +25,7 @@ package sql;{
     $self->{sql}->{dsn} = "dbi:$driver:hostname=$self->{sql}->{host};db=$self->{sql}->{database}" if $self->{sql}->{type} eq "fbsql";
 	$self->{sql}->{dsn} = "dbi:$driver:host=$self->{sql}->{host};dbname=$self->{sql}->{database}" if $self->{sql}->{type} eq "pgsql";
 	$self->{sql}->{dsn} = "Driver={$driver};DBQ=$self->{sql}->{database}" if $self->{sql}->{type} eq "access";
+	$self->{sql}->{dsn} = "dbi:$driver:dbname=$self->{sql}->{database}" if $self->{sql}->{type} eq "sqlite";
   }
 
   sub conn {
@@ -37,6 +38,7 @@ package sql;{
           $self->{sql}->{dbh} = DBI->connect("$self->{sql}->{dsn};ib_dialect=$self->{sql}->{dialect}", $self->{sql}->{user}, $self->{sql}->{password}) || die "$DBI::errstr" if $self->{sql}->{type} eq "fbsql";
 		  $self->{sql}->{dbh} = DBI->connect("$self->{sql}->{dsn}", $self->{sql}->{user}, $self->{sql}->{password}) || die "$DBI::errstr" if $self->{sql}->{type} eq "pgsql";
 		  $self->{sql}->{dbh} = DBI->connect("dbi:ODBC:$self->{sql}->{dsn}", $self->{sql}->{user}, $self->{sql}->{password}) || die "$DBI::errstr" if $self->{sql}->{type} eq "access";
+		  $self->{sql}->{dbh} = DBI->connect("$self->{sql}->{dsn}", "", "") || die "$DBI::errstr" if $self->{sql}->{type} eq "sqlite";
           $self->{sql}->{dbh}->{RaiseError} = 0; # при 1 eval игнорируется, для диагностики полезно
           $self->{sql}->{dbh}->{LongReadLen} = 512 * 1024 || die "$DBI::errstr"; # We are interested in the first 512 KB of data
           $self->{sql}->{dbh}->{LongTruncOk} = 1 || die "$DBI::errstr"; # We're happy to truncate any excess
